@@ -84,7 +84,9 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
     private Image pacmanUpImage;
     private Image pacmanDownImage;
     private Image pacmanLeftImage;
-    private Image pacmanRigthImage;
+    private Image pacmanRightImage;
+
+    private int difficulty = 3; //1 = easy, 2 = middle, 3 = hard
 
     //X = wall, O = skip, P = pac man, ' ' = food
     //Ghosts: b = blue, o = orange, p = pink, r = red
@@ -138,7 +140,7 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
         pacmanUpImage = new ImageIcon(getClass().getResource("assets/pacmanUp.png")).getImage();
         pacmanDownImage = new ImageIcon(getClass().getResource("assets/pacmanDown.png")).getImage();
         pacmanLeftImage = new ImageIcon(getClass().getResource("assets/pacmanLeft.png")).getImage();
-        pacmanRigthImage = new ImageIcon(getClass().getResource("assets/pacmanRight.png")).getImage();
+        pacmanRightImage = new ImageIcon(getClass().getResource("assets/pacmanRight.png")).getImage();
 
         loadMap();
         for(Block ghost : ghosts) {
@@ -272,23 +274,23 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
                 if(collision(ghost, wall) || ghost.x <= 0 || ghost.x + ghost.width >= boardWidth) {
                     ghost.x -= ghost.velocityX;
                     ghost.y -= ghost.velocityY;
+
                     char newDirection = directions[random.nextInt(4)];
 
-                    if(ghost.y < pacman.y && getCharAt(ghost.x/tileSize, ghost.y/tileSize+1) != 'X') {
-                        newDirection = 'D';
+                    if(difficulty == 1) {
+                        int rnd = random.nextInt(5);
+                        if(rnd == 0) newDirection = getIntelligentGhostDirection(ghost);
                     }
-                    else if(ghost.y > pacman.y && getCharAt(ghost.x/tileSize, ghost.y/tileSize-1) != 'X') {
-                        newDirection = 'U';
+                    else if(difficulty == 2) {
+                        int rnd = random.nextInt(5);
+                        if(rnd == 0 || rnd == 1 || rnd == 2) newDirection = getIntelligentGhostDirection(ghost);
                     }
-                    else if(ghost.x > pacman.x && getCharAt(ghost.x/tileSize-1, ghost.y/tileSize) != 'X') {
-                        newDirection = 'L';
+                    else if(difficulty == 3) {
+                        int rnd = random.nextInt(5);
+                        if(rnd != 4) newDirection = getIntelligentGhostDirection(ghost);
                     }
-                    else if(ghost.x < pacman.x && getCharAt(ghost.x/tileSize+1, ghost.y/tileSize) != 'X') {
-                        newDirection = 'R';
-                    }
-
-                    System.out.println(ghost.x + " " + ghost.y + getCharAt(ghost.x/tileSize, ghost.y/tileSize-1));
                     ghost.updateDirection(newDirection);
+                    break;
                 }
             }
         }
@@ -327,8 +329,48 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
     }
 
     public char getCharAt(int c, int r) {
+        if (r < 0 || r >= rows || c < 0 || c >= columns) {
+            return 'X';
+        }
+
         String row = tileMap[r];
         return row.charAt(c);
+    }
+
+    public char getIntelligentGhostDirection(Block ghost) {
+        char newDirection = directions[random.nextInt(4)];
+
+        int dx = ghost.x - pacman.x;
+        int dy = ghost.y - pacman.y;
+
+        char horizontal = dx > 0 ? 'L' : 'R';
+        char vertical   = dy > 0 ? 'U' : 'D';
+
+        if (Math.abs(dx) >= Math.abs(dy)) {
+            if (canMove(ghost, horizontal)) newDirection = horizontal;
+            else if (canMove(ghost, vertical)) newDirection = vertical;
+        } else {
+            if (canMove(ghost, vertical)) newDirection = vertical;
+            else if (canMove(ghost, horizontal)) newDirection = horizontal;
+        }
+
+        return newDirection;
+    }
+
+    private boolean canMove(Block ghost, char dir) {
+        if (ghost.x % tileSize != 0 || ghost.y % tileSize != 0) {
+            return false;
+        }
+
+        int tx = ghost.x / tileSize;
+        int ty = ghost.y / tileSize;
+        return switch (dir) {
+            case 'L' -> getCharAt(tx - 1, ty) != 'X';
+            case 'R' -> getCharAt(tx + 1, ty) != 'X';
+            case 'U' -> getCharAt(tx,ty - 1) != 'X';
+            case 'D' -> getCharAt(tx,ty + 1) != 'X';
+            default  -> false;
+        };
     }
 
     @Override
@@ -380,7 +422,7 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
             pacman.image = pacmanLeftImage;
         }
         else if(pacman.direction == 'R') {
-            pacman.image = pacmanRigthImage;
+            pacman.image = pacmanRightImage;
         }
     }
 }
