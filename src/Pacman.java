@@ -150,9 +150,9 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
     }
 
     public void loadMap() {
-        walls = new HashSet<Block>();
-        foods = new HashSet<Block>();
-        ghosts = new HashSet<Block>();
+        walls = new HashSet<>();
+        foods = new HashSet<>();
+        ghosts = new HashSet<>();
 
         for(int r = 0; r < rows; r++) {
             for (int c = 0; c < columns; c++) {
@@ -183,7 +183,7 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
                     ghosts.add(ghost);
                 }
                 else if (tileMapChar == 'P') {
-                    pacman = new Block(pacmanRigthImage, x, y, tileSize, tileSize);
+                    pacman = new Block(pacmanUpImage, x, y, tileSize, tileSize);
                 }
                 else if (tileMapChar == ' ') {
                     Block food = new Block(null, x+14, y+14, 4, 4);
