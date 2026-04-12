@@ -125,6 +125,7 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
     int score = 0;
     int lives = 3;
     boolean gameOver = false;
+    boolean startScreen = true;
 
     Pacman() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
@@ -225,6 +226,15 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
             g.setFont(new Font("Arial", Font.BOLD, 20));
             g.drawString("Press a button to continue", tileSize, boardHeight/2);
         }
+        else if (startScreen) {
+            g.setColor(Color.black);
+            g.fillRect(0, tileSize * 4, tileSize * 17, tileSize * 8);
+            g.setColor(Color.white);
+            g.setFont(new Font("Arial", Font.BOLD, 50));
+            g.drawString("Pacman", tileSize, boardHeight/3);
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+            g.drawString("Press 1/2/3 to set the difficulty", tileSize, boardHeight/2 - 2 * tileSize);
+        }
         else {
             g.setFont(new Font("Arial", Font.PLAIN, 18));
             g.drawString("Lives: " + lives + "   Score: " + score + " P", tileSize/2, tileSize/2);
@@ -266,8 +276,10 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
                 ghost.updateDirection(newDirection);
             }
 
-            ghost.x += ghost.velocityX;
-            ghost.y += ghost.velocityY;
+            if(!startScreen) {
+                ghost.x += ghost.velocityX;
+                ghost.y += ghost.velocityY;
+            }
 
             //ghost update position
             for(Block wall : walls) {
@@ -398,31 +410,35 @@ public class Pacman extends JPanel implements ActionListener,KeyListener{
             gameOver = false;
             gameLoop.start();
         }
+        else if(startScreen) {
+            loadMap();
+            resetPositions();
+            switch(e.getKeyCode()) {
+                case KeyEvent.VK_1: difficulty = 1; startScreen = false; gameLoop.start(); break;
+                case KeyEvent.VK_2: difficulty = 2; startScreen = false; gameLoop.start(); break;
+                case KeyEvent.VK_3: difficulty = 3; startScreen = false; gameLoop.start(); break;
+            }
+        }
+        else {
+            if (e.getKeyCode() == KeyEvent.VK_UP) {
+                pacman.updateDirection('U');
+            } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                pacman.updateDirection('D');
+            } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                pacman.updateDirection('L');
+            } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                pacman.updateDirection('R');
+            }
 
-        if(e.getKeyCode() == KeyEvent.VK_UP) {
-            pacman.updateDirection('U');
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-            pacman.updateDirection('D');
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-            pacman.updateDirection('L');
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            pacman.updateDirection('R');
-        }
-
-        if(pacman.direction == 'U') {
-            pacman.image = pacmanUpImage;
-        }
-        else if(pacman.direction == 'D') {
-            pacman.image = pacmanDownImage;
-        }
-        else if(pacman.direction == 'L') {
-            pacman.image = pacmanLeftImage;
-        }
-        else if(pacman.direction == 'R') {
-            pacman.image = pacmanRightImage;
+            if (pacman.direction == 'U') {
+                pacman.image = pacmanUpImage;
+            } else if (pacman.direction == 'D') {
+                pacman.image = pacmanDownImage;
+            } else if (pacman.direction == 'L') {
+                pacman.image = pacmanLeftImage;
+            } else if (pacman.direction == 'R') {
+                pacman.image = pacmanRightImage;
+            }
         }
     }
 }
